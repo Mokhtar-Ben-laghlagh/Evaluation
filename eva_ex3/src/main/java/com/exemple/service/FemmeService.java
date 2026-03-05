@@ -1,0 +1,81 @@
+package com.exemple.service;
+
+
+import com.exemple.entites.Femme;
+import com.exemple.util.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import java.util.Date;
+import java.util.List;
+
+public class FemmeService extends AbstractFacade<Femme>{
+
+    public FemmeService() {
+        super(Femme.class);
+    }
+
+    public int findEnfants(int f_id, Date d1, Date d2) {
+        Session session = null;
+        Transaction tran = null;
+        int nbEnf = 0;
+
+        try{
+            session = HibernateUtil.getSessionFactory().openSession();
+            tran = session.beginTransaction();
+
+            Number result = (Number) session.createNamedQuery("findEnfants")
+                    .setParameter("f_id", f_id)
+                    .setParameter("d1", d1)
+                    .setParameter("d2", d2)
+                    .uniqueResult();
+
+            if (result != null) {
+                nbEnf = result.intValue();
+            }
+
+
+
+            tran.commit();
+        }catch(Exception h) {
+            if(tran != null) {
+                tran.rollback();
+            }
+            h.printStackTrace();
+        }finally {
+            if(session != null) {
+                session.close();
+            }
+        }
+        return nbEnf;
+    }
+
+    public List<Femme> findFemmesMarieesAuMoinsDeux() {
+        Session session = null;
+        Transaction tran = null;
+        List<Femme> femmes = null;
+
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tran = session.beginTransaction();
+
+            femmes = session.createNamedQuery("findFemmesMarieesAuMoinsDeux", Femme.class)
+                    .list();
+
+            tran.commit();
+
+        } catch (Exception e) {
+            if (tran != null) {
+                tran.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return femmes;
+    }
+
+
+}
